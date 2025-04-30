@@ -31,6 +31,7 @@ The key challenge in this problem is handling the potentially enormous grid spac
 
 
 ## Time and Space Complexity
+### Explainer video
 [![Big-O explainer video](https://img.youtube.com/vi/g2o22C3CRfU/maxresdefault.jpg)](https://www.youtube.com/watch?v=g2o22C3CRfU "Big-O explainer video")
 
 **Time Complexity**: O(n) where n is the number of living cells, since we only need to evaluate living cells and their immediate neighbors.
