@@ -29,6 +29,53 @@ struct CellHash {
 };
 
 class ConwaysGame {
+private:
+    // just store living cells - much more efficient for sparse board
+    std::unordered_set<Cell, CellHash> alive;
+
+    int neighborCount(const Cell& cell) const {
+        int neighbors = 0;
+
+        // CHECK THE 8 SURROUNDING CELLS
+        for (int x_offset = -1; x_offset <= 1; ++x_offset) {
+            for (int y_offset = -1; y_offset <= 1; ++y_offset) {
+                // Skip the cell itself
+                if (x_offset == 0 && y_offset == 0)
+                    continue;
+
+                // create neighbor cell and check if it's alive
+                Cell neighbor = {cell.x + x_offset, cell.y + y_offset};
+                if (alive.count(neighbor) > 0) {
+                    neighbors++;
+                }
+            }
+        }
+
+        return neighbors;
+    }
+
+    // this is a key optimzation - only check cells that might change
+    std::unordered_set<Cell, CellHash> getCellsToEvaluate() const {
+        std::unordered_set<Cell, CellHash> candidates;
+
+        // need to check all living cells and their neighbors
+        for (const auto& cell : alive) {
+            // The cell itself might die
+            candidates.insert(cell);
+
+            // Its neighbors might come to life
+            for (int x_offset = -1; x_offset <= 1; ++x_offset) {
+                for (int y_offset = -1; y_offset <= 1; ++y_offset) {
+                    Cell neighbor = {cell.x + x_offset, cell.y + y_offset};
+                    candidates.insert(neighbor);
+                }
+            }
+        }
+
+        return candidates;
+    }
+
+public:
 
 };
 
