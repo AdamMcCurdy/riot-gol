@@ -39,7 +39,6 @@ The key challenge in this problem is handling the potentially enormous grid spac
 ## Trade-offs Considered
 
 1. **Set vs. Map**: I chose an unordered_set over an unordered_map because we only need to track whether a cell is alive (not store additional data).
-
 2. **Single File vs. Multi-File**: For this exercise, I kept everything in a single file for simplicity, but noted how it would be structured in a production environment.
     ### Project Structure
 
@@ -58,9 +57,8 @@ The key challenge in this problem is handling the potentially enormous grid spac
     This structure would better separate concerns and improve maintainability for long-term development.
 
 3. **Hash Function**: The hash function is designed to be simple but effective for this specific use case. In a production environment, I might use a more sophisticated hash function if collision patterns became an issue with very large datasets.
-
 4. **Edge Cases**: The implementation correctly handles the entire 64-bit signed integer range without overflow issues.
-
+5. **File Input**: Using a hardcoded file name means less flexibility but simpler usage. In a production environment, I would add command-line argument support to specify different input files.
 ## Dev Process
 
 This implementation is my own. I didn't use AI to generate any code assets. 
