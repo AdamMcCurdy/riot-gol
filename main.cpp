@@ -76,7 +76,43 @@ private:
     }
 
 public:
+    // Simple setter to mark a cell as alive
+    void setAlive(int64_t x, int64_t y) {
+        alive.insert({x, y});
+    }
 
+    // Run a single generation
+    void tick() {
+        // Can't modify as we iterate, so need a new set
+        std::unordered_set<Cell, CellHash> next_gen;
+
+        // get cells we need to evalate
+        auto candidates = getCellsToEvaluate();
+
+        // Apply Conway's rules
+        for (const auto& cell : candidates) {
+            int neighbors = neighborCount(cell);
+            bool is_alive = alive.count(cell) > 0;
+
+            // Rule 1: Living cell survives with 2-3 neighbors
+            if (is_alive && (neighbors == 2 || neighbors == 3)) {
+                next_gen.insert(cell);
+            }
+            // Rule 2: Dead cell with exactly 3 neighbors comes to life
+            else if (!is_alive && neighbors == 3) {
+                next_gen.insert(cell);
+            }
+            // Otherwise: cell is dead in next generation (no need to add it)
+        }
+
+        // update for next generaton
+        alive = std::move(next_gen);
+    }
+
+    // Get all living cells (for output)
+    const std::unordered_set<Cell, CellHash>& getAliveCells() const {
+        return alive;
+    }
 };
 
 int main() {
