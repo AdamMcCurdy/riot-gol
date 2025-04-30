@@ -6,3 +6,34 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# Executables
+*.exe
+*.out
+
+# Object files
+*.o
+*.obj
+
+# Libraries
+*.lib
+*.a
+*.so
+*.dll
+*.dylib
+
+# Compiler-generated files
+*.d
+*.gch
+*.pch
+
+# Build directories
+build/
+bin/
+
+# IDE specific files
+.vscode/
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.filters
