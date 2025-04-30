@@ -24,71 +24,60 @@ jobs:
             cpp_compiler: g++
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Create sample_input.txt if not exists
-      shell: bash
-      run: |
-        if [ ! -f "sample_input.txt" ]; then
-          echo "#Life 1.06" > sample_input.txt
-          echo "0 0" >> sample_input.txt
-          echo "1 0" >> sample_input.txt
-          echo "0 1" >> sample_input.txt
-          echo "1 1" >> sample_input.txt
-          echo "2 2" >> sample_input.txt
-        fi
-    
-    - name: Set reusable strings
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-    
-    - name: Configure CMake
-      run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DCMAKE_INSTALL_PREFIX=${{ steps.strings.outputs.build-output-dir }}/install
-        -S ${{ github.workspace }}
-    
-    - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-    
-    - name: Create Package Directory
-      shell: bash
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: |
-        mkdir -p package
-        # For Windows, find the exe in the appropriate directory
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          cp ${{ matrix.build_type }}/riot_gol.exe package/
-        else
-          cp riot_gol package/
-        fi
-        cp ${{ github.workspace }}/sample_input.txt package/
-    
-    - name: Create ZIP Package
-      shell: bash
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: |
-        cd package
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          7z a ../riot_gol_windows.zip *
-        else
-          zip -r ../riot_gol_linux.zip *
-        fi
-    
-    - name: Upload Executable Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: riot-gol-${{ matrix.os }}
-        path: |
-          ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.os == 'windows-latest' && matrix.build_type || '' }}/riot_gol${{ matrix.os == 'windows-latest' && '.exe' || '' }}
-    
-    - name: Upload Complete Package
-      uses: actions/upload-artifact@v4
-      with:
-        name: riot-gol-package-${{ matrix.os }}
-        path: ${{ steps.strings.outputs.build-output-dir }}/riot_gol_${{ matrix.os == 'windows-latest' && 'windows' || 'linux' }}.zip
+      - uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_INSTALL_PREFIX=${{ steps.strings.outputs.build-output-dir }}/install
+          -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: Create Package Directory
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir -p ${{ steps.strings.outputs.build-output-dir }}/package
+          # Copy the sample_input.txt from repo root
+          cp sample_input.txt ${{ steps.strings.outputs.build-output-dir }}/package/
+          
+          # For Windows, find the exe in the appropriate directory
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/riot_gol.exe ${{ steps.strings.outputs.build-output-dir }}/package/
+          else
+            cp ${{ steps.strings.outputs.build-output-dir }}/riot_gol ${{ steps.strings.outputs.build-output-dir }}/package/
+          fi
+
+      - name: Create ZIP Package
+        shell: bash
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}/package
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            7z a ../riot_gol_windows.zip *
+          else
+            zip -r ../riot_gol_linux.zip *
+          fi
+
+      - name: Upload Executable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: riot-gol-${{ matrix.os }}
+          path: |
+            ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.os == 'windows-latest' && matrix.build_type || '' }}/riot_gol${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+
+      - name: Upload Complete Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: riot-gol-package-${{ matrix.os }}
+          path: ${{ steps.strings.outputs.build-output-dir }}/riot_gol_${{ matrix.os == 'windows-latest' && 'windows' || 'linux' }}.zip
