@@ -1,0 +1,3 @@
+C:/Users/wired/CLionProjects/riot-gol/cmake-build-debug/CMakeFiles/riot_gol.dir
+C:/Users/wired/CLionProjects/riot-gol/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/wired/CLionProjects/riot-gol/cmake-build-debug/CMakeFiles/rebuild_cache.dir
