@@ -1,4 +1,4 @@
-name: Conway's Game of Life Build
+name: Conway's Game of Life Build and Release
 
 on:
   push:
@@ -123,3 +123,55 @@ jobs:
         with:
           name: riot-gol-package-${{ matrix.os }}
           path: ${{ steps.strings.outputs.build-output-dir }}/riot_gol_${{ matrix.os == 'windows-latest' && 'windows' || 'linux' }}.zip
+
+  release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+
+      - name: Get commit count
+        id: commit_count
+        run: echo "count=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create version number
+        id: version
+        run: echo "version=${{ steps.date.outputs.date }}.${{ steps.commit_count.outputs.count }}" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          echo "# Conway's Game of Life - Build ${{ steps.version.outputs.version }}" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "## Changes in this release" >> RELEASE_NOTES.md
+          git log -5 --pretty=format:"- %s" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "## Installation" >> RELEASE_NOTES.md
+          echo "Download the appropriate zip file for your platform and extract it. The package includes the executable and a sample input file." >> RELEASE_NOTES.md
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/riot-gol-package-*/riot_gol_*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
